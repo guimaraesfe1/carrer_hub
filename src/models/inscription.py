@@ -10,7 +10,7 @@ from .base import Base
 class Inscription(Base):
     __tablename__ = 'inscriptions'
 
-    jobopening_id: Mapped[int] = mapped_column(
+    job_id: Mapped[int] = mapped_column(
         ForeignKey('jobs.id'), primary_key=True
     )
     student_id: Mapped[int] = mapped_column(
@@ -24,12 +24,12 @@ class Inscription(Base):
     @classmethod
     def create_inscription(
         cls,
-        jobopening_id: int,
+        job_id: int,
         student_id: int,
         data_inscription: dict,
         session: Session,
     ):
-        inscription = session.get(Inscription, (jobopening_id, student_id))
+        inscription = session.get(cls, (job_id, student_id))
 
         if inscription:
             raise HTTPException(
@@ -39,7 +39,7 @@ class Inscription(Base):
 
         new_inscription = cls(
             student_id=student_id,
-            jobopening_id=jobopening_id,
+            job_id=job_id,
             **data_inscription,
         )
 
@@ -47,7 +47,50 @@ class Inscription(Base):
         session.commit()
 
     @classmethod
-    def update_inscription(cls): ...
+    def update_inscription(
+        cls,
+        job_id: int,
+        student_id: int,
+        inscription_update: dict,
+        session: Session,
+    ):
+        getInscription = session.get(cls, (job_id, student_id))
+
+        if not getInscription:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Inscrição não encontrada',
+            )
+
+        for key, value in inscription_update:
+            if value is None:
+                continue
+
+            setattr(getInscription, key, value)
+
+        session.commit()
 
     @classmethod
-    def delete_inscription(cls): ...
+    def delete_inscription(cls, job_id, student_id, session: Session):
+        getInscription = session.get(cls, (job_id, student_id))
+
+        if not getInscription:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Inscrição não encontrada!',
+            )
+
+        session.delete(getInscription)
+        session.commit()
+
+    @classmethod
+    def get_inscription(cls, job_id, student_id, session: Session):
+        getInscription = session.get(cls, (job_id, student_id))
+
+        if not getInscription:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Inscrição não encontrada!',
+            )
+
+        return getInscription

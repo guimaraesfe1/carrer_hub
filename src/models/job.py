@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, Session, mapped_column
 
-from ..schemas.job import CreateJobSchema
+from ..schemas.job import CreateJobSchema, UpdateJobSchema
 from .base import Base
 from .company import Company
 
@@ -45,17 +45,30 @@ class Job(Base):
         session.commit()
 
     @classmethod
-    def update_job(cls, job_id: int, job_data_update: dict, session: Session):
+    def update_job(
+        cls,
+        job_id: int,
+        job_data_update: UpdateJobSchema,
+        company_id: int,
+        session: Session,
+    ):
         try:
-            get_job = session.get(cls, job_id)
+            data_update = job_data_update.model_dump()
 
+            get_job = session.get(cls, job_id)
             if not get_job:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail='Vaga não encontrada!',
                 )
 
-            for key, value in job_data_update.items():
+            if get_job.company_id != company_id:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail='Não tem permissão para atualizar essa vaga!',
+                )
+
+            for key, value in data_update.items():
                 if value is None:
                     continue
 
@@ -71,7 +84,7 @@ class Job(Base):
             ) from None
 
     @classmethod
-    def delete_job(cls, job_id: int, company_id, session: Session):
+    def delete_job(cls, job_id: int, company_id: int, session: Session):
         get_job = session.get(cls, job_id)
 
         if not get_job:
@@ -88,3 +101,15 @@ class Job(Base):
 
         session.delete(get_job)
         session.commit()
+
+    @classmethod
+    def get_job(cls, job_id: int, session: Session):
+        get_job = session.get(cls, job_id)
+
+        if not get_job:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Vaga não encontrada!',
+            )
+
+        return get_job

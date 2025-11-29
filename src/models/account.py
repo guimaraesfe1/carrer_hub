@@ -53,7 +53,6 @@ class Account(Base):
     @classmethod
     def getAccountByEmail(cls, email: str, session: Session):
         getAccount = session.query(cls).filter_by(email=email).first()
-
         if not getAccount:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -61,3 +60,9 @@ class Account(Base):
             )
 
         return getAccount
+
+    @classmethod
+    def getACcountById(cls, account_id: int, session: Session):
+        account_data = session.get(cls, account_id)
+
+        return account_data

@@ -4,7 +4,6 @@ from ..models.base import Base
 
 # from ..security.enviroment import env_settings
 
-# pra testes
 engine = create_engine('sqlite:///database.db', echo=True)
 
 Base.metadata.create_all(engine)

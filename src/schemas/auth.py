@@ -8,3 +8,8 @@ class AccountSignUpSchema(BaseModel):
     email: EmailStr
     password: str
     role: AccountRole
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

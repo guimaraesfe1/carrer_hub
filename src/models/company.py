@@ -13,7 +13,10 @@ class Company(Base):
     id: Mapped[int] = mapped_column(
         ForeignKey('accounts.id'), primary_key=True
     )
-    name: Mapped[str] = mapped_column(nullable=True, default=None)
+    name: Mapped[str] = mapped_column(String(100), nullable=False, default=None)
+    legal_name: Mapped[Optional[str]] = mapped_column(String(150))
+    cnpj: Mapped[str] = mapped_column(String(18), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(init=False, server_default=func.now())
 
     @classmethod
     def create_company(

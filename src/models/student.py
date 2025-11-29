@@ -16,12 +16,13 @@ class Student(Base):
         ForeignKey('accounts.id'), primary_key=True
     )
     first_name: Mapped[str] = mapped_column(
-        String(30), nullable=True, default=None
+        String(30), nullable=False, default=None
     )
     last_name: Mapped[str] = mapped_column(
-        String(30), nullable=True, default=None
+        String(30), nullable=False, default=None
     )
     birth_date: Mapped[date] = mapped_column(nullable=True, default=None)
+    course: Mapped[str] = mapped_column(nullable=False, default=None)
 
     @classmethod
     def create_student(
